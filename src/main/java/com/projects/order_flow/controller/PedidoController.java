@@ -39,12 +39,10 @@ public class PedidoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPedido(@PathVariable Long id){
-        try {
+
             pedidoService.deletarPedido(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
     }
 
     @PatchMapping("/{id}/status")
