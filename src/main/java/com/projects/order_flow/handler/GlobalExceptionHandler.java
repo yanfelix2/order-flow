@@ -74,8 +74,8 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "JSON Inválido ou Campo Incorreto");
 
-        // Aqui a gente simplifica aquela mensagem gigante para algo humano
-        String message = "Erro na leitura do JSON. Verifique se os valores de Enums (como Cargo) ou tipos de dados estão corretos.";
+
+        String message = "Erro na leitura do JSON. Verifique se os campos estão corretos e se o formato do JSON é válido.";
         body.put("message", message);
         body.put("path", request.getRequestURI());
 
