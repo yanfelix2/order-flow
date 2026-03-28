@@ -22,40 +22,35 @@ public class UsuarioController {
     }
 
     @PostMapping("/criar")
-    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioRequestDTO usuarioDTO){
+    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioRequestDTO usuarioDTO) {
         UsuarioResponseDTO usuario = usuarioService.criarUsuario(usuarioDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
 
     }
 
     @GetMapping("/listar")
-    public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios(){
+    public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios() {
         List<UsuarioResponseDTO> usuarios = usuarioService.listarUsuarios();
         return ResponseEntity.ok(usuarios);
     }
 
     @GetMapping("/listar/{id}")
-    public ResponseEntity<UsuarioResponseDTO> listarUsuarioPorId(@PathVariable Long id){
-       UsuarioResponseDTO usuario = usuarioService.obterUsuarioPorId(id);
-       return ResponseEntity.ok(usuario);
-
+    public ResponseEntity<UsuarioResponseDTO> listarUsuarioPorId(@PathVariable Long id) {
+        UsuarioResponseDTO usuario = usuarioService.obterUsuarioPorId(id);
+        return ResponseEntity.ok(usuario);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable Long id){
-
-
+    public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
         usuarioService.deletarUsuario(id);
-
         return ResponseEntity.noContent().build();
-
-
-
     }
 
-
-
-
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioRequestDTO){
+        UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizarUsuario(id,usuarioRequestDTO);
+        return ResponseEntity.ok(usuarioAtualizado);
+    }
 
 
 }
