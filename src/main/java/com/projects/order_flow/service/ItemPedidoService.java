@@ -70,7 +70,33 @@ public class ItemPedidoService {
         itemPedidoRepository.save(itemPedido);
 
 
-        return new ItemPedidoResponseDTO(itemPedido.getId(), itemPedido.getProduto().getNome(), itemPedido.getQuantidade(), itemPedido.getPreco_no_momento(), itemPedido.getObservacao());
+      return converterParaDTO(itemPedidoRepository.save(itemPedido));
+    }
+
+    @Transactional
+    public void removerItem(Long id){
+        ItemPedido item = itemPedidoRepository.findById(id).orElseThrow(() -> new NotFoundException("Item do pedido não encontrado com esse ID!"));
+
+        if (item.getPedido().getStatus() != Status.ABERTO && item.getPedido().getStatus() != Status.PREPARANDO){
+            throw new BusinessException("Não é possível remover itens de um pedido que já foi pago ou cancelado!");
+        }
+
+        BigDecimal valorItem = item.getPreco_no_momento().multiply(BigDecimal.valueOf(item.getQuantidade()));
+        BigDecimal novoTotal = item.getPedido().getValor_total().subtract(valorItem);
+        item.getPedido().setValor_total(novoTotal);
+
+        itemPedidoRepository.delete(item);
+
+    }
+
+    private ItemPedidoResponseDTO converterParaDTO(ItemPedido item) {
+        return new ItemPedidoResponseDTO(
+                item.getId(),
+                item.getProduto().getNome(),
+                item.getQuantidade(),
+                item.getPreco_no_momento(),
+                item.getObservacao()
+        );
     }
 
 
