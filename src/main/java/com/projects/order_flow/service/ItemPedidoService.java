@@ -92,6 +92,7 @@ public class ItemPedidoService {
     private ItemPedidoResponseDTO converterParaDTO(ItemPedido item) {
         return new ItemPedidoResponseDTO(
                 item.getId(),
+                item.getProduto().getId(),
                 item.getProduto().getNome(),
                 item.getQuantidade(),
                 item.getPreco_no_momento(),

@@ -46,6 +46,7 @@ public class PedidoService {
                 pedido.getItens().stream()
                         .map(item -> new ItemPedidoResponseDTO(
                                 item.getId(),
+                                item.getProduto().getId(),
                                 item.getProduto().getNome(),
                                 item.getQuantidade(),
                                 item.getPreco_no_momento(),
