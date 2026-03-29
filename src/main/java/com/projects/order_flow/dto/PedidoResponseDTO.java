@@ -5,6 +5,7 @@ import com.projects.order_flow.database.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record PedidoResponseDTO(
         Long id,
@@ -13,5 +14,6 @@ public record PedidoResponseDTO(
         LocalDateTime dataCriacao,
         BigDecimal valorTotal,
         String nomeAtendente,
-        FormaPagamento formaPagamento
+        FormaPagamento formaPagamento,
+        List<ItemPedidoResponseDTO> itens
 ) {}
