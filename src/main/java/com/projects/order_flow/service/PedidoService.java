@@ -8,14 +8,17 @@ import com.projects.order_flow.database.repository.PagamentoRepository;
 import com.projects.order_flow.database.repository.PedidoRepository;
 import com.projects.order_flow.database.repository.UsuarioRepository;
 import com.projects.order_flow.dto.AtualizarStatusRequestDTO;
+import com.projects.order_flow.dto.ItemPedidoResponseDTO;
 import com.projects.order_flow.dto.PedidoRequestDTO;
 import com.projects.order_flow.dto.PedidoResponseDTO;
 import com.projects.order_flow.exception.BusinessException;
+import com.projects.order_flow.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -31,7 +34,28 @@ public class PedidoService {
         this.pagamentoRepository = pagamentoRepository;
     }
 
-    public PedidoResponseDTO criarPedido(PedidoRequestDTO pedidoRequestDTO){
+    private PedidoResponseDTO converterParaDTO(Pedido pedido) {
+        return new PedidoResponseDTO(
+                pedido.getId(),
+                pedido.getComanda(),
+                pedido.getStatus(),
+                pedido.getData_criacao(),
+                pedido.getValor_total(),
+                pedido.getUsuario().getNome(),
+                pedido.getPagamento(),
+                pedido.getItens().stream()
+                        .map(item -> new ItemPedidoResponseDTO(
+                                item.getId(),
+                                item.getProduto().getNome(),
+                                item.getQuantidade(),
+                                item.getPreco_no_momento(),
+                                item.getObservacao()
+                        ))
+                        .toList()
+        );
+    }
+
+    public PedidoResponseDTO criarPedido(PedidoRequestDTO pedidoRequestDTO) {
         Pedido pedido = new Pedido();
         pedido.setComanda(pedidoRequestDTO.comanda());
         pedido.setUsuario(usuarioRepository.findById(pedidoRequestDTO.usuarioId()).orElseThrow(() -> new RuntimeException("Usuário não encontrado")));
@@ -41,32 +65,27 @@ public class PedidoService {
 
         pedidoRepository.save(pedido);
 
-        return new PedidoResponseDTO(pedido.getId(),pedido.getComanda(), pedido.getStatus(), pedido.getData_criacao(), pedido.getValor_total(), pedido.getUsuario().getNome(), pedido.getPagamento());
+        return converterParaDTO(pedido);
 
     }
 
-    public Pedido obterPedidoPorId(Long id){
-        return pedidoRepository.findById(id).orElse(null);
+    public PedidoResponseDTO obterPedidoPorId(Long id) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Pedido com este ID não encontrado!"));
+
+        return converterParaDTO(pedido);
     }
 
     public List<PedidoResponseDTO> listarTodos() {
-        return pedidoRepository.findAll().stream()
-                .map(pedido -> new PedidoResponseDTO(
-                        pedido.getId(),
-                        pedido.getComanda(),
-                        pedido.getStatus(),
-                        pedido.getData_criacao(),
-                        pedido.getValor_total(),
-                        pedido.getUsuario().getNome(),
-                        pedido.getPagamento()
-                ))
-                .toList();
+       return pedidoRepository.findAll().stream()
+               .map(this::converterParaDTO)
+               .toList();
     }
 
-    public void deletarPedido(Long id){
+    public void deletarPedido(Long id) {
 
         if (!pedidoRepository.existsById(id)) {
-            throw new RuntimeException("Pedido não encontrado");
+            throw new NotFoundException("Pedido não encontrado");
         }
 
         pedidoRepository.deleteById(id);
@@ -74,8 +93,9 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponseDTO atualizarStatus(Long id, AtualizarStatusRequestDTO request) {
+
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Pedido não encontrado"));
 
 
         if (pedido.getStatus() == Status.PAGO || pedido.getStatus() == Status.CANCELADO) {
@@ -85,9 +105,8 @@ public class PedidoService {
 
         if (request.novoStatus() == Status.PAGO) {
             if (request.formaPagamento() == null) {
-                throw new RuntimeException("Para finalizar, informe a forma de pagamento!");
+                throw new BusinessException("Para finalizar, informe a forma de pagamento!");
             }
-
 
             Pagamento novoPagamento = new Pagamento();
             novoPagamento.setPedido(pedido);
@@ -95,8 +114,6 @@ public class PedidoService {
             novoPagamento.setDataPagamento(LocalDateTime.now());
             novoPagamento.setFormaPagamento(request.formaPagamento());
             novoPagamento.setAtendente(pedido.getUsuario());
-
-
 
             pagamentoRepository.save(novoPagamento);
         }
@@ -110,18 +127,11 @@ public class PedidoService {
 
         pedido.setPagamento(request.formaPagamento());
         pedido.setStatus(request.novoStatus());
+
         pedidoRepository.save(pedido);
 
 
-        return new PedidoResponseDTO(
-                pedido.getId(),
-                pedido.getComanda(),
-                pedido.getStatus(),
-                pedido.getData_criacao(),
-                pedido.getValor_total(),
-                pedido.getUsuario().getNome(),
-                pedido.getPagamento()
-        );
+        return converterParaDTO(pedido);
     }
 
 }
