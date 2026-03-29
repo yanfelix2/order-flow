@@ -35,7 +35,7 @@ public class Pedido {
 
     private BigDecimal valor_total;
 
-    // Dentro da classe Pedido
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itens;
 
