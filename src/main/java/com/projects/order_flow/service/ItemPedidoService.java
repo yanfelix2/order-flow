@@ -67,10 +67,7 @@ public class ItemPedidoService {
 
         itemPedido.getPedido().setValor_total(novoTotalPedido);
 
-        itemPedidoRepository.save(itemPedido);
-
-
-      return converterParaDTO(itemPedidoRepository.save(itemPedido));
+        return converterParaDTO(itemPedidoRepository.save(itemPedido));
     }
 
     @Transactional
