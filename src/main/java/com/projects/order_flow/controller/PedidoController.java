@@ -51,5 +51,11 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoResponseDTO);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PedidoResponseDTO> obterPedidoPorId(@PathVariable Long id) {
+        PedidoResponseDTO pedidoResponseDTO = pedidoService.obterPedidoPorId(id);
+        return ResponseEntity.ok(pedidoResponseDTO);
+    }
+
 
 }
