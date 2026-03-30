@@ -97,5 +97,25 @@ public class ItemPedidoService {
         );
     }
 
+    @Transactional
+    public ItemPedidoResponseDTO atualizarItem(Long id, ItemPedidoRequestDTO dto){
+        ItemPedido itemPedido = itemPedidoRepository.findById(id).orElseThrow(() -> new NotFoundException("Item do pedido não encontrado com esse ID!"));
+
+        if (itemPedido.getPedido().getStatus() == Status.PAGO || itemPedido.getPedido().getStatus() == Status.CANCELADO){
+            throw  new BusinessException("Não é possível atualizar itens de um pedido que já foi pago ou cancelado!");
+        }
+
+        BigDecimal valorAntigo = itemPedido.getPreco_no_momento().multiply(BigDecimal.valueOf(itemPedido.getQuantidade()));
+        BigDecimal totalSemItem = itemPedido.getPedido().getValor_total().subtract(valorAntigo);
+
+        itemPedido.setQuantidade(dto.quantidade());
+        itemPedido.setObservacao(dto.observacao());
+
+        BigDecimal novoValorItem = itemPedido.getPreco_no_momento().multiply(BigDecimal.valueOf(itemPedido.getQuantidade()));
+        itemPedido.getPedido().setValor_total(totalSemItem.add(novoValorItem));
+
+        return converterParaDTO(itemPedidoRepository.save(itemPedido));
+    }
+
 
 }

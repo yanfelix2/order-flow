@@ -33,6 +33,12 @@ public class ItemPedidoController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ItemPedidoResponseDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemPedidoRequestDTO itemPedidoRequestDTO){
+        ItemPedidoResponseDTO itemPedidoResponseDTO = itemPedidoService.atualizarItem(id,itemPedidoRequestDTO);
+        return ResponseEntity.ok(itemPedidoResponseDTO);
+    }
+
 
 
 }
