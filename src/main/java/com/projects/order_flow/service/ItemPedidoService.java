@@ -36,19 +36,15 @@ public class ItemPedidoService {
         ItemPedido itemPedido = new ItemPedido();
         itemPedido.setPedido(pedidoRepository.findById(itemPedidoRequest.pedidoId()).orElseThrow(() -> new NotFoundException("Pedido não encontrado")));
 
-        if (itemPedido.getPedido().getStatus() == Status.PAGO){
-            throw new BusinessException("Este pedido já foi pago, Abra uma nova comanda!");
+        Status status = itemPedido.getPedido().getStatus();
+
+        switch (status) {
+            case PAGO -> throw new BusinessException("Este pedido já foi pago, Abra uma nova comanda!");
+
+            case CANCELADO -> throw new BusinessException("Não é possível adicionar itens a um pedido cancelado!");
+
+            case ABERTO -> itemPedido.getPedido().setStatus(Status.PREPARANDO);
         }
-
-        if (itemPedido.getPedido().getStatus() == Status.CANCELADO) {
-            throw new BusinessException("Não é possível adicionar itens a um pedido cancelado!");
-        }
-
-        if (itemPedido.getPedido().getStatus() == Status.ABERTO) {
-            itemPedido.getPedido().setStatus(Status.PREPARANDO);
-        }
-
-
 
 
         itemPedido.setProduto(produtoRepository.findById(itemPedidoRequest.produtoId()).orElseThrow(() -> new RuntimeException("Produto não encontrado")));
